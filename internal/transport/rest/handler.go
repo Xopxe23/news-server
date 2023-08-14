@@ -7,13 +7,13 @@ import (
 )
 
 type Handler struct {
-	articlesService ArticlesService
+	// articlesService ArticlesService
 	usersService    UsersService
 }
 
-func NewHandler(articles ArticlesService, users UsersService) *Handler {
+func NewHandler(users UsersService) *Handler {
 	return &Handler{
-		articlesService: articles,
+		// articlesService: articles,
 		usersService: users,
 	}
 }

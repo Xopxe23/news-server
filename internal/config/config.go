@@ -5,9 +5,9 @@ import (
 	"github.com/spf13/viper"
 )
 
-type Config struct{
+type Config struct {
 	DB Postgres
-	
+
 	Server struct {
 		Port int `mapstructure:"port"`
 	} `mapstructure:"server"`
@@ -17,7 +17,7 @@ type Postgres struct {
 	Host     string
 	Port     int
 	Username string
-	DBName   string
+	Name     string
 	SSLMode  string
 	Password string
 }
