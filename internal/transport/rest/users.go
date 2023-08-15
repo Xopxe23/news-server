@@ -15,6 +15,15 @@ type UsersService interface {
 	SignIn(ctx context.Context, input domain.SignInInput) (string, string, error)
 }
 
+// @Summary Sign Up
+// @Tags Users auth
+// @ID sign-up
+// @Accept json
+// @Produce json 
+// @Param input body domain.SignUpInput true "Sign up input"
+// @Success 200
+// @Failure 400 
+// @Router /auth/sign-up [post]
 func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	reqBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -44,6 +53,16 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 }
 
+// @Summary Sign In
+// @Tags Users auth
+// @ID sign-in
+// @Accept json
+// @Produce json 
+// @Param input body domain.SignInInput true "Sign in input"
+// @Success 200 {string} string
+// @Failure 400 
+// @Failure 500 
+// @Router /auth/sign-in [post]
 func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 	reqBytes, err := io.ReadAll(r.Body)
 	if err != nil {

@@ -26,6 +26,15 @@ func init() {
 	log.SetLevel(log.InfoLevel)
 }
 
+// @title News API 
+// @version 1.0
+// @description Sample Server for News App
+// @host localhost:8000
+// @basepath /
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
+
 func main() {
 	cfg, err := config.New(CONFIG_DIR, CONFIG_FILE)
 	if err != nil {

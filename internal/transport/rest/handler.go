@@ -4,6 +4,8 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/swaggo/http-swagger"
+	_ "github.com/xopxe23/news-server/docs"
 )
 
 type Handler struct {
@@ -21,6 +23,7 @@ func NewHandler(users UsersService) *Handler {
 func (h *Handler) InitRoutes() *mux.Router {
 	r := mux.NewRouter()
 	r.Use(loggingMiddleware)
+	r.PathPrefix("/swagger").HandlerFunc(httpSwagger.WrapHandler)
 
 	auth := r.PathPrefix("/auth").Subrouter()
 	{
