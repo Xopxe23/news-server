@@ -49,7 +49,8 @@ func main() {
 	hasher := hasher.NewSHA1Hasher("salt")
 
 	usersRepos := repository.NewUsersRepository(db)
-	usersService := service.NewUsersService(usersRepos, hasher)
+	tokensRepos := repository.NewTokensRepository(db)
+	usersService := service.NewUsersService(usersRepos, hasher, tokensRepos, []byte("sample secret"))
 
 	handler := rest.NewHandler(usersService)
 

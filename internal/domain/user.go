@@ -1,5 +1,13 @@
 package domain
 
+import "github.com/go-playground/validator/v10"
+
+var validate *validator.Validate
+
+func init() {
+	validate = validator.New()
+}
+
 type User struct {
 	Id       int    `json:"id"`
 	Name     string `json:"name"`
@@ -8,12 +16,20 @@ type User struct {
 }
 
 type SignUpInput struct {
-	Name     string `json:"name"`
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Name     string `json:"name" validate:"required,gte=2"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,gte=6"`
+}
+
+func (i SignUpInput) Validate() error {
+	return validate.Struct(i)
 }
 
 type SignInInput struct {
-	Email    string `json:"email"`
-	Password string `json:"password"`
+	Email    string `json:"email" validate:"required,email"`
+	Password string `json:"password" validate:"required,gte=6"`
+}
+
+func (i SignInInput) Validate() error {
+	return validate.Struct(i)
 }

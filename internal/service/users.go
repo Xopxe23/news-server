@@ -2,7 +2,11 @@ package service
 
 import (
 	"context"
+	"fmt"
+	"math/rand"
+	"time"
 
+	"github.com/golang-jwt/jwt/v5"
 	"github.com/xopxe23/news-server/internal/domain"
 )
 
@@ -12,17 +16,26 @@ type PasswordHasher interface {
 
 type UsersRepository interface {
 	Create(ctx context.Context, user domain.User) error
+	GetByCredentials(ctx context.Context, email, password string) (domain.User, error)
+}
+
+type SessionsRepository interface {
+	Create(ctx context.Context, token domain.RefreshSession) error
 }
 
 type UsersService struct {
-	repo   UsersRepository
-	hasher PasswordHasher
+	repo         UsersRepository
+	hasher       PasswordHasher
+	sessionsRepo SessionsRepository
+	hmacSecret   []byte
 }
 
-func NewUsersService(repo UsersRepository, hasher PasswordHasher) *UsersService {
+func NewUsersService(repo UsersRepository, hasher PasswordHasher, sessionsRepo SessionsRepository, secret []byte) *UsersService {
 	return &UsersService{
-		repo:   repo,
-		hasher: hasher,
+		repo:         repo,
+		sessionsRepo: sessionsRepo,
+		hasher:       hasher,
+		hmacSecret:   secret,
 	}
 }
 
@@ -37,4 +50,58 @@ func (s *UsersService) SignUp(ctx context.Context, input domain.SignUpInput) err
 		Password: password,
 	}
 	return s.repo.Create(ctx, user)
+}
+
+func (s *UsersService) SignIn(ctx context.Context, input domain.SignInInput) (string, string, error) {
+	password, err := s.hasher.Hash(input.Password)
+	if err != nil {
+		return "", "", err
+	}
+
+	user, err := s.repo.GetByCredentials(ctx, input.Email, password)
+	if err != nil {
+		return "", "", err
+	}
+
+	return s.generateTokens(ctx, user.Id)
+}
+
+func (s *UsersService) generateTokens(ctx context.Context, userId int) (string, string, error) {
+	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
+		"sub": userId,
+		"iat": time.Now().Unix(),
+		"exp": time.Now().Add(time.Hour * 24).Unix(),
+	})
+
+	accessToken, err := t.SignedString(s.hmacSecret)
+	if err != nil {
+		return "", "", err
+	}
+
+	refreshToken, err := newRefreshToken()
+	if err != nil {
+		return "", "", err
+	}
+	
+	if err := s.sessionsRepo.Create(ctx, domain.RefreshSession{
+		UserId: userId,
+		Token: refreshToken,
+		ExpiresAt: time.Now().Add(time.Hour * 12),
+	}); err != nil {
+		return "", "", err
+	}
+	return accessToken, refreshToken, nil
+}
+
+func newRefreshToken() (string, error) {
+	b := make([]byte, 32)
+
+	s := rand.NewSource(time.Now().Unix())
+	r := rand.New(s)
+
+	if _, err := r.Read(b); err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%x", b), nil
 }

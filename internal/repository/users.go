@@ -20,3 +20,10 @@ func (r *UsersRepository) Create(ctx context.Context, user domain.User) error {
 		user.Name, user.Email, user.Password)
 	return err
 }
+
+func (r *UsersRepository) GetByCredentials(ctx context.Context, email, password string) (domain.User, error) {
+	var user domain.User
+	err := r.db.QueryRow("SELECT id, name, email FROM users WHERE email = $1 and password_hash = $2",
+		email, password).Scan(&user.Id, &user.Name, &user.Email)
+	return user, err
+}
