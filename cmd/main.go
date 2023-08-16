@@ -61,7 +61,10 @@ func main() {
 	tokensRepos := repository.NewTokensRepository(db)
 	usersService := service.NewUsersService(usersRepos, hasher, tokensRepos, []byte("sample secret"))
 
-	handler := rest.NewHandler(usersService)
+	authorsRepos := repository.NewAuthorsRepository(db)
+	articlesService := service.NewArticlesService(authorsRepos)
+
+	handler := rest.NewHandler(usersService, articlesService)
 
 	// init & run server
 	srv := &http.Server{

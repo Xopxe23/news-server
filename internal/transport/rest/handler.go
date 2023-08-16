@@ -9,15 +9,15 @@ import (
 )
 
 type Handler struct {
-	// articlesService ArticlesService
-	// authorsService AuthorsService
-	usersService UsersService
+	articlesService ArticlesService
+	usersService    UsersService
 }
 
-func NewHandler(users UsersService) *Handler {
+func NewHandler(users UsersService, articles ArticlesService) *Handler {
 	return &Handler{
 		// articlesService: articles,
-		usersService: users,
+		usersService:    users,
+		articlesService: articles,
 	}
 }
 
@@ -37,9 +37,9 @@ func (h *Handler) InitRoutes() *mux.Router {
 	{
 		authors.HandleFunc("", h.getAllAuthors).Methods(http.MethodGet)
 		authors.HandleFunc("", h.createAuthor).Methods(http.MethodPost)
-		authors.HandleFunc("", h.getAuthorById).Methods(http.MethodGet)
-		authors.HandleFunc("", h.updateAuthor).Methods(http.MethodPut)
-		authors.HandleFunc("", h.deleteAuthor).Methods(http.MethodDelete)
+		authors.HandleFunc("/{id:[0-9]+}", h.getAuthorById).Methods(http.MethodGet)
+		authors.HandleFunc("/{id:[0-9]+}", h.updateAuthor).Methods(http.MethodPut)
+		authors.HandleFunc("/{id:[0-9]+}", h.deleteAuthor).Methods(http.MethodDelete)
 	}
 
 	articles := r.PathPrefix("/articles").Subrouter()
