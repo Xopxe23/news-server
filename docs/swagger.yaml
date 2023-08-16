@@ -1,5 +1,14 @@
 basePath: /
 definitions:
+  domain.Author:
+    properties:
+      id:
+        type: integer
+      name:
+        type: string
+      surname:
+        type: string
+    type: object
   domain.SignInInput:
     properties:
       email:
@@ -25,6 +34,13 @@ definitions:
     - email
     - name
     - password
+    type: object
+  domain.UpdateAuthorInput:
+    properties:
+      name:
+        type: string
+      surname:
+        type: string
     type: object
 host: localhost:8000
 info:
@@ -98,6 +114,119 @@ paths:
       summary: Sign Up
       tags:
       - Users auth
+  /authors:
+    get:
+      consumes:
+      - application/json
+      operationId: get-all-articles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get All Authors
+      tags:
+      - Articles
+    post:
+      consumes:
+      - application/json
+      operationId: create-author
+      parameters:
+      - description: Author input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Author'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create Author
+      tags:
+      - Articles
+  /authors/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: delete-author
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Delete Author
+      tags:
+      - Articles
+    get:
+      consumes:
+      - application/json
+      operationId: get-author-by-id
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get Author By Id
+      tags:
+      - Articles
+    put:
+      consumes:
+      - application/json
+      operationId: update-author
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Author input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateAuthorInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Update Author
+      tags:
+      - Articles
 securityDefinitions:
   ApiKeyAuth:
     in: header

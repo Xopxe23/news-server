@@ -20,6 +20,15 @@ type ArticlesService interface {
 	DeleteAuthor(ctx context.Context, authorId int) error
 }
 
+// @Summary Get All Authors
+// @Tags Articles
+// @ID get-all-articles
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /authors [get]
 func (h *Handler) getAllAuthors(w http.ResponseWriter, r *http.Request) {
 	authors, err := h.articlesService.GetAllAuthors(r.Context())
 	if err != nil {
@@ -41,6 +50,16 @@ func (h *Handler) getAllAuthors(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// @Summary Create Author
+// @Tags Articles
+// @ID create-author
+// @Accept json
+// @Produce json
+// @Param input body domain.Author true "Author input"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /authors [post]
 func (h *Handler) createAuthor(w http.ResponseWriter, r *http.Request) {
 	reqBytes, err := io.ReadAll(r.Body)
 	if err != nil {
@@ -75,6 +94,16 @@ func (h *Handler) createAuthor(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// @Summary Get Author By Id
+// @Tags Articles
+// @ID get-author-by-id
+// @Accept json
+// @Produce json
+// @Param id path int true "Author ID"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /authors/{id} [get]
 func (h *Handler) getAuthorById(w http.ResponseWriter, r *http.Request) {
 	authorId, err := getIdFromRequest(r)
 	if err != nil {
@@ -101,6 +130,17 @@ func (h *Handler) getAuthorById(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// @Summary Update Author
+// @Tags Articles
+// @ID update-author
+// @Accept json
+// @Produce json
+// @Param id path int true "Author ID"
+// @Param input body domain.UpdateAuthorInput true "Update Author input"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /authors/{id} [put]
 func (h *Handler) updateAuthor(w http.ResponseWriter, r *http.Request) {
 	authorId, err := getIdFromRequest(r)
 	if err != nil {
@@ -140,6 +180,17 @@ func (h *Handler) updateAuthor(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+
+// @Summary Delete Author
+// @Tags Articles
+// @ID delete-author
+// @Accept json
+// @Produce json
+// @Param id path int true "Author ID"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /authors/{id} [delete]
 func (h *Handler) deleteAuthor(w http.ResponseWriter, r *http.Request) {
 	authorId, err := getIdFromRequest(r)
 	if err != nil {
