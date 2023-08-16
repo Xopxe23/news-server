@@ -9,3 +9,9 @@ type Article struct {
 	Content   string    `json:"content"`
 	CreatedAt time.Time `json:"created_at"`
 }
+
+type Author struct {
+	Id      int    `json:"id"`
+	Name    string `json:"name"`
+	Surname string `json:"surname"`
+}

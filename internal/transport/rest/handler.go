@@ -10,7 +10,8 @@ import (
 
 type Handler struct {
 	// articlesService ArticlesService
-	usersService    UsersService
+	// authorsService AuthorsService
+	usersService UsersService
 }
 
 func NewHandler(users UsersService) *Handler {
@@ -30,7 +31,16 @@ func (h *Handler) InitRoutes() *mux.Router {
 		auth.HandleFunc("/sign-up", h.signUp).Methods(http.MethodPost)
 		auth.HandleFunc("/sign-in", h.signIn).Methods(http.MethodPost)
 	}
-	
+
+	authors := r.PathPrefix("/authors").Subrouter()
+	{
+		authors.HandleFunc("", h.getAllAuthors).Methods(http.MethodGet)
+		authors.HandleFunc("", h.createAuthor).Methods(http.MethodPost)
+		authors.HandleFunc("", h.getAuthorById).Methods(http.MethodGet)
+		authors.HandleFunc("", h.updateAuthor).Methods(http.MethodPut)
+		authors.HandleFunc("", h.deleteAuthor).Methods(http.MethodDelete)
+	}
+
 	articles := r.PathPrefix("/articles").Subrouter()
 	{
 		articles.HandleFunc("", h.getAllArticles).Methods(http.MethodGet)
