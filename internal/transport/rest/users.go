@@ -52,7 +52,18 @@ func (h *Handler) signUp(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusBadRequest)
 		return
 	}
-	w.WriteHeader(http.StatusOK)
+
+	response, err := json.Marshal(map[string]string{
+		"status": "success",
+	})
+	if err != nil {
+		logError("signUp", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
 }
 
 // @Summary Sign In

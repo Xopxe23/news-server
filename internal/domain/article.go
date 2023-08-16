@@ -15,3 +15,8 @@ type Author struct {
 	Name    string `json:"name"`
 	Surname string `json:"surname"`
 }
+
+type UpdateAuthorInput struct {
+	Name    *string `json:"name"`
+	Surname *string `json:"surname"`
+}

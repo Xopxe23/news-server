@@ -16,6 +16,8 @@ type ArticlesService interface {
 	CreateAuthor(ctx context.Context, author domain.Author) (int, error)
 	GetAllAuthors(ctx context.Context) ([]domain.Author, error)
 	GetAuthorById(ctx context.Context, authorId int) (domain.Author, error)
+	UpdateAuthor(ctx context.Context, authorId int, input domain.UpdateAuthorInput) error
+	DeleteAuthor(ctx context.Context, authorId int) error
 }
 
 func (h *Handler) getAllAuthors(w http.ResponseWriter, r *http.Request) {
@@ -99,8 +101,70 @@ func (h *Handler) getAuthorById(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func (h *Handler) updateAuthor(w http.ResponseWriter, r *http.Request) {}
-func (h *Handler) deleteAuthor(w http.ResponseWriter, r *http.Request) {}
+func (h *Handler) updateAuthor(w http.ResponseWriter, r *http.Request) {
+	authorId, err := getIdFromRequest(r)
+	if err != nil {
+		logError("updateAuthor", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	reqBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		logError("updateAuthor", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var input domain.UpdateAuthorInput
+	if err := json.Unmarshal(reqBytes, &input); err != nil {
+		logError("updateAuthor", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if err = h.articlesService.UpdateAuthor(r.Context(), authorId, input); err != nil {
+		logError("updateAuthor", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(map[string]string{
+		"status": "author updated",
+	})
+	if err != nil {
+		logError("updateAuthor", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
+func (h *Handler) deleteAuthor(w http.ResponseWriter, r *http.Request) {
+	authorId, err := getIdFromRequest(r)
+	if err != nil {
+		logError("deleteAuthor", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	err = h.articlesService.DeleteAuthor(r.Context(), authorId)
+	if err != nil {
+		logError("deleteAuthor", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	response, err := json.Marshal(map[string]string{
+		"status": "author deleted",
+	})
+	if err != nil {
+		logError("deleteAuthor", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
 
 func (h *Handler) getAllArticles(w http.ResponseWriter, r *http.Request) {}
 func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request)  {}
