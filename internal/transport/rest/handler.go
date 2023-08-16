@@ -30,6 +30,7 @@ func (h *Handler) InitRoutes() *mux.Router {
 	{
 		auth.HandleFunc("/sign-up", h.signUp).Methods(http.MethodPost)
 		auth.HandleFunc("/sign-in", h.signIn).Methods(http.MethodPost)
+		auth.HandleFunc("/refresh", h.refresh).Methods(http.MethodGet)
 	}
 
 	authors := r.PathPrefix("/authors").Subrouter()

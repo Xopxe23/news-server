@@ -21,6 +21,7 @@ type UsersRepository interface {
 
 type SessionsRepository interface {
 	Create(ctx context.Context, token domain.RefreshSession) error
+	GetToken(ctx context.Context, token string) (domain.RefreshSession, error)
 }
 
 type UsersService struct {
@@ -66,6 +67,19 @@ func (s *UsersService) SignIn(ctx context.Context, input domain.SignInInput) (st
 	return s.generateTokens(ctx, user.Id)
 }
 
+func (s *UsersService) RefreshTokens(ctx context.Context, token string) (string, string, error) {
+	session, err := s.sessionsRepo.GetToken(ctx, token)
+	if err != nil {
+		return "", "", err
+	}
+
+	if session.ExpiresAt.Unix() < time.Now().Unix() {
+		return "", "", err
+	}
+
+	return s.generateTokens(ctx, session.UserId)
+}
+
 func (s *UsersService) generateTokens(ctx context.Context, userId int) (string, string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
 		"sub": userId,
@@ -82,10 +96,10 @@ func (s *UsersService) generateTokens(ctx context.Context, userId int) (string, 
 	if err != nil {
 		return "", "", err
 	}
-	
+
 	if err := s.sessionsRepo.Create(ctx, domain.RefreshSession{
-		UserId: userId,
-		Token: refreshToken,
+		UserId:    userId,
+		Token:     refreshToken,
 		ExpiresAt: time.Now().Add(time.Hour * 12),
 	}); err != nil {
 		return "", "", err

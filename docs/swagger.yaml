@@ -33,6 +33,23 @@ info:
   title: News API
   version: "1.0"
 paths:
+  /auth/refresh:
+    get:
+      consumes:
+      - application/json
+      operationId: refresh
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            type: string
+        "500":
+          description: Internal Server Error
+      summary: Refresh
+      tags:
+      - Users auth
   /auth/sign-in:
     post:
       consumes:

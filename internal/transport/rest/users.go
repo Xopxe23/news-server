@@ -7,12 +7,14 @@ import (
 	"io"
 	"net/http"
 
+	"github.com/sirupsen/logrus"
 	"github.com/xopxe23/news-server/internal/domain"
 )
 
 type UsersService interface {
 	SignUp(ctx context.Context, input domain.SignUpInput) error
 	SignIn(ctx context.Context, input domain.SignInInput) (string, string, error)
+	RefreshTokens(ctx context.Context, token string) (string, string, error)
 }
 
 // @Summary Sign Up
@@ -98,6 +100,44 @@ func (h *Handler) signIn(w http.ResponseWriter, r *http.Request) {
 		logError("signIn", err)
 		w.WriteHeader(http.StatusInternalServerError)
 		return
+	}
+
+	w.Header().Add("Set-Cookie", fmt.Sprintf("refresh-token=%s; HttpOnly", refreshToken))
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
+// @Summary Refresh
+// @Tags Users auth
+// @ID refresh
+// @Accept json
+// @Produce json
+// @Success 200 {string} string
+// @Failure 500
+// @Router /auth/refresh [get]
+func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
+	cookie, err := r.Cookie("refresh-token")
+	if err != nil {
+		logError("refresh", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	logrus.Infof("%s", cookie.Value)
+
+	accessToken, refreshToken, err := h.usersService.RefreshTokens(r.Context(), cookie.Value)
+	if err != nil {
+		logError("refresh", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(map[string]string{
+		"token": accessToken,
+	})
+	if err != nil {
+		logError("refresh", err)
+		w.WriteHeader(http.StatusInternalServerError)
 	}
 
 	w.Header().Add("Set-Cookie", fmt.Sprintf("refresh-token=%s; HttpOnly", refreshToken))
