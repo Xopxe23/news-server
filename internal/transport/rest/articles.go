@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"net/http"
 	"strconv"
@@ -21,6 +22,9 @@ type ArticlesService interface {
 
 	CreateArticle(ctx context.Context, input domain.Article) (int, error)
 	GetAllArticles(ctx context.Context) ([]domain.ArticleOutput, error)
+	GetArticleById(ctx context.Context, articleId int) (domain.ArticleOutput, error)
+	UpdateArticle(ctx context.Context, articleId int, input domain.UpdateArticleInput) error
+	DeleteArticle(ctx context.Context, articleId int) error
 }
 
 // @Summary Get All Authors
@@ -207,7 +211,7 @@ func (h *Handler) deleteAuthor(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	response, err := json.Marshal(map[string]string{
-		"status": "author deleted",
+		"status": fmt.Sprintf("author №%d deleted", authorId),
 	})
 	if err != nil {
 		logError("deleteAuthor", err)
@@ -239,6 +243,11 @@ func (h *Handler) getAllArticles(w http.ResponseWriter, r *http.Request) {
 	response, err := json.Marshal(map[string][]domain.ArticleOutput{
 		"data": articles,
 	})
+	if err != nil {
+		logError("getAllArticles", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
 
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(response)
@@ -289,9 +298,132 @@ func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func (h *Handler) getArticleById(w http.ResponseWriter, r *http.Request) {}
-func (h *Handler) updateArticle(w http.ResponseWriter, r *http.Request)  {}
-func (h *Handler) deleteArticle(w http.ResponseWriter, r *http.Request)  {}
+// @Summary Get Article By Id
+// @Tags Articles
+// @ID get-article-by-id
+// @Accept json
+// @Produce json
+// @Param id path int true "Article ID"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /articles/{id} [get]
+func (h *Handler) getArticleById(w http.ResponseWriter, r *http.Request) {
+	articleId, err := getIdFromRequest(r)
+	if err != nil {
+		logError("getArticleById", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	article, err := h.articlesService.GetArticleById(r.Context(), articleId)
+	if err != nil {
+		logError("getArticleById", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(map[string]domain.ArticleOutput{
+		"article": article,
+	})
+	if err != nil {
+		logError("getArticleById", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
+// @Summary Update Article
+// @Tags Articles
+// @ID update-article
+// @Accept json
+// @Produce json
+// @Param id path int true "Article ID"
+// @Param input body domain.UpdateArticleInput true "Update Article input"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /articles/{id} [put]
+func (h *Handler) updateArticle(w http.ResponseWriter, r *http.Request) {
+	articleId, err := getIdFromRequest(r)
+	if err != nil {
+		logError("updateArticle", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	var input domain.UpdateArticleInput
+	reqBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		logError("updateArticle", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+	if err := json.Unmarshal(reqBytes, &input); err != nil {
+		logError("updateArticle", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	err = h.articlesService.UpdateArticle(r.Context(), articleId, input)
+	if err != nil {
+		logError("updateArticle", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(map[string]string{
+		"status": fmt.Sprintf("article №%d updated", articleId),
+	})
+	if err != nil {
+		logError("updateArticle", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
+// @Summary Delete Article
+// @Tags Articles
+// @ID delete-article
+// @Accept json
+// @Produce json
+// @Param id path int true "Article ID"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /articles/{id} [delete]
+func (h *Handler) deleteArticle(w http.ResponseWriter, r *http.Request) {
+	articleId, err := getIdFromRequest(r)
+	if err != nil {
+		logError("deleteArticle", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	if err := h.articlesService.DeleteArticle(r.Context(), articleId); err != nil {
+		logError("deleteArticle", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(map[string]string{
+		"status": fmt.Sprintf("article №%d deleted", articleId),
+	})
+	if err != nil {
+		logError("deleteArticle", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
 
 func getIdFromRequest(r *http.Request) (int, error) {
 	vars := mux.Vars(r)

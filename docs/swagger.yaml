@@ -5,12 +5,14 @@ definitions:
       author_id:
         type: integer
       content:
+        minLength: 20
         type: string
       created_at:
         type: string
       id:
         type: integer
       title:
+        minLength: 10
         type: string
     required:
     - content
@@ -50,6 +52,18 @@ definitions:
     - email
     - name
     - password
+    type: object
+  domain.UpdateArticleInput:
+    properties:
+      content:
+        minLength: 20
+        type: string
+      title:
+        minLength: 10
+        type: string
+    required:
+    - content
+    - title
     type: object
   domain.UpdateAuthorInput:
     properties:
@@ -103,6 +117,79 @@ paths:
         "500":
           description: Internal Server Error
       summary: Create Article
+      tags:
+      - Articles
+  /articles/{id}:
+    delete:
+      consumes:
+      - application/json
+      operationId: delete-article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Delete Article
+      tags:
+      - Articles
+    get:
+      consumes:
+      - application/json
+      operationId: get-article-by-id
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get Article By Id
+      tags:
+      - Articles
+    put:
+      consumes:
+      - application/json
+      operationId: update-article
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      - description: Update Article input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.UpdateArticleInput'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Update Article
       tags:
       - Articles
   /auth/refresh:

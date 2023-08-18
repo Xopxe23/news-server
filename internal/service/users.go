@@ -50,6 +50,11 @@ func (s *UsersService) SignUp(ctx context.Context, input domain.SignUpInput) err
 		Email:    input.Email,
 		Password: password,
 	}
+
+	if err := input.Validate(); err != nil {
+		return err
+	}
+	
 	return s.repo.Create(ctx, user)
 }
 

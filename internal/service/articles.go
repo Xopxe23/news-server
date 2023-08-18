@@ -10,6 +10,9 @@ import (
 type ArticlesRepository interface {
 	Create(сtx context.Context, input domain.Article) (int, error)
 	GetAll(ctx context.Context) ([]domain.ArticleOutput, error)
+	GetById(ctx context.Context, id int) (domain.ArticleOutput, error)
+	Update(ctx context.Context, id int, input domain.UpdateArticleInput) error
+	Delete(ctx context.Context, id int) error
 }
 
 type AuthorsRepository interface {
@@ -57,9 +60,25 @@ func (s *ArticlesService) CreateArticle(ctx context.Context, input domain.Articl
 		input.CreatedAt = time.Now()
 	}
 
+	if err := input.Validate(); err != nil {
+		return 0, err
+	}
+
 	return s.articlesRepo.Create(ctx, input)
 }
 
 func (s *ArticlesService) GetAllArticles(ctx context.Context) ([]domain.ArticleOutput, error) {
 	return s.articlesRepo.GetAll(ctx)
+}
+
+func (s *ArticlesService) GetArticleById(ctx context.Context, articleId int) (domain.ArticleOutput, error) {
+	return s.articlesRepo.GetById(ctx, articleId)
+}
+
+func (s *ArticlesService) UpdateArticle(ctx context.Context, articleId int, input domain.UpdateArticleInput) error {
+	return s.articlesRepo.Update(ctx, articleId, input)
+}
+
+func (s *ArticlesService) DeleteArticle(ctx context.Context, articleId int) error {
+	return s.articlesRepo.Delete(ctx, articleId)
 }

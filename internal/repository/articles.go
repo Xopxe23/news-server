@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"fmt"
+	"strings"
 
 	"github.com/xopxe23/news-server/internal/domain"
 )
@@ -39,4 +41,43 @@ func (r *ArticlesRepository) GetAll(ctx context.Context) ([]domain.ArticleOutput
 		articles = append(articles, article)
 	}
 	return articles, nil
+}
+
+func (r *ArticlesRepository) GetById(ctx context.Context, articleId int) (domain.ArticleOutput, error) {
+	var article domain.ArticleOutput
+	query := `SELECT ar.id, CONCAT(au.name, ' ', au.surname) as author, ar.title, ar.content, ar.created_at 
+			  FROM articles ar INNER JOIN authors au ON ar.author_id = au.id WHERE ar.id = $1;`
+	err := r.db.QueryRow(query, articleId).Scan(&article.Id, &article.Author, &article.Title, &article.Content, &article.CreatedAt)
+
+	return article, err
+}
+
+func (r *ArticlesRepository) Update(ctx context.Context, articleId int, input domain.UpdateArticleInput) error {
+	setValues := make([]string, 0)
+	args := make([]interface{}, 0)
+	argId := 1
+
+	if input.Title != nil {
+		setValues = append(setValues, fmt.Sprintf("title = $%d", argId))
+		args = append(args, *input.Title)
+		argId++
+	}
+	if input.Content != nil {
+		setValues = append(setValues, fmt.Sprintf("content = $%d", argId))
+		args = append(args, *input.Content)
+		argId++
+	}
+
+	setQuery := strings.Join(setValues, ", ")
+	query := fmt.Sprintf("UPDATE articles SET %s WHERE id = $%d", setQuery, argId)
+	fmt.Println(query)
+	args = append(args, articleId)
+
+	_, err := r.db.Exec(query, args...)
+	return err
+}
+
+func (r *ArticlesRepository) Delete(ctx context.Context, articleId int) error {
+	_, err := r.db.Exec("DELETE FROM articles WHERE id = $1", articleId)
+	return err
 }
