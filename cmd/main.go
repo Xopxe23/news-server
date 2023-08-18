@@ -1,9 +1,12 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	_ "github.com/lib/pq"
 	log "github.com/sirupsen/logrus"
@@ -53,7 +56,6 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	defer db.Close()
 
 	hasher := hasher.NewSHA1Hasher("salt")
 
@@ -72,8 +74,25 @@ func main() {
 		Addr:    fmt.Sprintf(":%d", cfg.Server.Port),
 		Handler: handler.InitRoutes(),
 	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	log.Info("SERVER STARTED")
-	if err := srv.ListenAndServe(); err != nil {
-		log.Fatal(err)
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<- quit
+
+	log.Info("SERVER SHUTDOWN")
+
+	if err := srv.Shutdown(context.Background()); err != nil {
+		log.Errorf("error on server shutting: %s", err.Error())
+	}
+
+	if err := db.Close(); err != nil {
+		log.Errorf("error on db closing: %s", err.Error())
 	}
 }
