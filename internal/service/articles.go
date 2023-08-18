@@ -2,11 +2,15 @@ package service
 
 import (
 	"context"
+	"time"
 
 	"github.com/xopxe23/news-server/internal/domain"
 )
 
-type ArticlesRepository interface{}
+type ArticlesRepository interface {
+	Create(сtx context.Context, input domain.Article) (int, error)
+	GetAll(ctx context.Context) ([]domain.ArticleOutput, error)
+}
 
 type AuthorsRepository interface {
 	Create(сtx context.Context, author domain.Author) (int, error)
@@ -17,12 +21,14 @@ type AuthorsRepository interface {
 }
 
 type ArticlesService struct {
-	authorsRepo AuthorsRepository
+	authorsRepo  AuthorsRepository
+	articlesRepo ArticlesRepository
 }
 
-func NewArticlesService(authorsRepo AuthorsRepository) *ArticlesService {
+func NewArticlesService(authorsRepo AuthorsRepository, articlesRepo ArticlesRepository) *ArticlesService {
 	return &ArticlesService{
-		authorsRepo: authorsRepo,
+		authorsRepo:  authorsRepo,
+		articlesRepo: articlesRepo,
 	}
 }
 
@@ -44,4 +50,16 @@ func (s *ArticlesService) UpdateAuthor(ctx context.Context, id int, input domain
 
 func (s *ArticlesService) DeleteAuthor(ctx context.Context, id int) error {
 	return s.authorsRepo.Delete(ctx, id)
+}
+
+func (s *ArticlesService) CreateArticle(ctx context.Context, input domain.Article) (int, error) {
+	if input.CreatedAt.IsZero() {
+		input.CreatedAt = time.Now()
+	}
+
+	return s.articlesRepo.Create(ctx, input)
+}
+
+func (s *ArticlesService) GetAllArticles(ctx context.Context) ([]domain.ArticleOutput, error) {
+	return s.articlesRepo.GetAll(ctx)
 }

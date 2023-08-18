@@ -62,7 +62,8 @@ func main() {
 	usersService := service.NewUsersService(usersRepos, hasher, tokensRepos, []byte("sample secret"))
 
 	authorsRepos := repository.NewAuthorsRepository(db)
-	articlesService := service.NewArticlesService(authorsRepos)
+	articlesRepos := repository.NewArticlesRepository(db)
+	articlesService := service.NewArticlesService(authorsRepos, articlesRepos)
 
 	handler := rest.NewHandler(usersService, articlesService)
 

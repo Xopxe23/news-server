@@ -16,6 +16,67 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
+        "/articles": {
+            "get": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Get All Articles",
+                "operationId": "get-all-articles",
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            },
+            "post": {
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "Articles"
+                ],
+                "summary": "Create Article",
+                "operationId": "create-articles",
+                "parameters": [
+                    {
+                        "description": "Article input",
+                        "name": "input",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/domain.Article"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK"
+                    },
+                    "400": {
+                        "description": "Bad Request"
+                    },
+                    "500": {
+                        "description": "Internal Server Error"
+                    }
+                }
+            }
+        },
         "/auth/refresh": {
             "get": {
                 "consumes": [
@@ -125,10 +186,10 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Articles"
+                    "Authors"
                 ],
                 "summary": "Get All Authors",
-                "operationId": "get-all-articles",
+                "operationId": "get-all-authors",
                 "responses": {
                     "200": {
                         "description": "OK"
@@ -149,7 +210,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Articles"
+                    "Authors"
                 ],
                 "summary": "Create Author",
                 "operationId": "create-author",
@@ -186,7 +247,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Articles"
+                    "Authors"
                 ],
                 "summary": "Get Author By Id",
                 "operationId": "get-author-by-id",
@@ -219,7 +280,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Articles"
+                    "Authors"
                 ],
                 "summary": "Update Author",
                 "operationId": "update-author",
@@ -261,7 +322,7 @@ const docTemplate = `{
                     "application/json"
                 ],
                 "tags": [
-                    "Articles"
+                    "Authors"
                 ],
                 "summary": "Delete Author",
                 "operationId": "delete-author",
@@ -289,6 +350,30 @@ const docTemplate = `{
         }
     },
     "definitions": {
+        "domain.Article": {
+            "type": "object",
+            "required": [
+                "content",
+                "title"
+            ],
+            "properties": {
+                "author_id": {
+                    "type": "integer"
+                },
+                "content": {
+                    "type": "string"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "title": {
+                    "type": "string"
+                }
+            }
+        },
         "domain.Author": {
             "type": "object",
             "properties": {

@@ -1,5 +1,21 @@
 basePath: /
 definitions:
+  domain.Article:
+    properties:
+      author_id:
+        type: integer
+      content:
+        type: string
+      created_at:
+        type: string
+      id:
+        type: integer
+      title:
+        type: string
+    required:
+    - content
+    - title
+    type: object
   domain.Author:
     properties:
       id:
@@ -49,6 +65,46 @@ info:
   title: News API
   version: "1.0"
 paths:
+  /articles:
+    get:
+      consumes:
+      - application/json
+      operationId: get-all-articles
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Get All Articles
+      tags:
+      - Articles
+    post:
+      consumes:
+      - application/json
+      operationId: create-articles
+      parameters:
+      - description: Article input
+        in: body
+        name: input
+        required: true
+        schema:
+          $ref: '#/definitions/domain.Article'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      summary: Create Article
+      tags:
+      - Articles
   /auth/refresh:
     get:
       consumes:
@@ -118,7 +174,7 @@ paths:
     get:
       consumes:
       - application/json
-      operationId: get-all-articles
+      operationId: get-all-authors
       produces:
       - application/json
       responses:
@@ -130,7 +186,7 @@ paths:
           description: Internal Server Error
       summary: Get All Authors
       tags:
-      - Articles
+      - Authors
     post:
       consumes:
       - application/json
@@ -153,7 +209,7 @@ paths:
           description: Internal Server Error
       summary: Create Author
       tags:
-      - Articles
+      - Authors
   /authors/{id}:
     delete:
       consumes:
@@ -176,7 +232,7 @@ paths:
           description: Internal Server Error
       summary: Delete Author
       tags:
-      - Articles
+      - Authors
     get:
       consumes:
       - application/json
@@ -198,7 +254,7 @@ paths:
           description: Internal Server Error
       summary: Get Author By Id
       tags:
-      - Articles
+      - Authors
     put:
       consumes:
       - application/json
@@ -226,7 +282,7 @@ paths:
           description: Internal Server Error
       summary: Update Author
       tags:
-      - Articles
+      - Authors
 securityDefinitions:
   ApiKeyAuth:
     in: header

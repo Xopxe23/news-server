@@ -18,11 +18,14 @@ type ArticlesService interface {
 	GetAuthorById(ctx context.Context, authorId int) (domain.Author, error)
 	UpdateAuthor(ctx context.Context, authorId int, input domain.UpdateAuthorInput) error
 	DeleteAuthor(ctx context.Context, authorId int) error
+
+	CreateArticle(ctx context.Context, input domain.Article) (int, error)
+	GetAllArticles(ctx context.Context) ([]domain.ArticleOutput, error)
 }
 
 // @Summary Get All Authors
-// @Tags Articles
-// @ID get-all-articles
+// @Tags Authors
+// @ID get-all-authors
 // @Accept json
 // @Produce json
 // @Success 200
@@ -51,7 +54,7 @@ func (h *Handler) getAllAuthors(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Create Author
-// @Tags Articles
+// @Tags Authors
 // @ID create-author
 // @Accept json
 // @Produce json
@@ -95,7 +98,7 @@ func (h *Handler) createAuthor(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Get Author By Id
-// @Tags Articles
+// @Tags Authors
 // @ID get-author-by-id
 // @Accept json
 // @Produce json
@@ -131,7 +134,7 @@ func (h *Handler) getAuthorById(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Update Author
-// @Tags Articles
+// @Tags Authors
 // @ID update-author
 // @Accept json
 // @Produce json
@@ -180,9 +183,8 @@ func (h *Handler) updateAuthor(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-
 // @Summary Delete Author
-// @Tags Articles
+// @Tags Authors
 // @ID delete-author
 // @Accept json
 // @Produce json
@@ -217,8 +219,76 @@ func (h *Handler) deleteAuthor(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
-func (h *Handler) getAllArticles(w http.ResponseWriter, r *http.Request) {}
-func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request)  {}
+// @Summary Get All Articles
+// @Tags Articles
+// @ID get-all-articles
+// @Accept json
+// @Produce json
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /articles [get]
+func (h *Handler) getAllArticles(w http.ResponseWriter, r *http.Request) {
+	var articles []domain.ArticleOutput
+	articles, err := h.articlesService.GetAllArticles(r.Context())
+	if err != nil {
+		logError("getAllArticles", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+	response, err := json.Marshal(map[string][]domain.ArticleOutput{
+		"data": articles,
+	})
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
+// @Summary Create Article
+// @Tags Articles
+// @ID create-articles
+// @Accept json
+// @Produce json
+// @Param input body domain.Article true "Article input"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /articles [post]
+func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request) {
+	reqBytes, err := io.ReadAll(r.Body)
+	if err != nil {
+		logError("createArticle", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	var input domain.Article
+	if err := json.Unmarshal(reqBytes, &input); err != nil {
+		logError("createArticle", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	articleId, err := h.articlesService.CreateArticle(r.Context(), input)
+	if err != nil {
+		logError("createArticle", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	response, err := json.Marshal(map[string]int{
+		"article id": articleId,
+	})
+	if err != nil {
+		logError("createArticle", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
 func (h *Handler) getArticleById(w http.ResponseWriter, r *http.Request) {}
 func (h *Handler) updateArticle(w http.ResponseWriter, r *http.Request)  {}
 func (h *Handler) deleteArticle(w http.ResponseWriter, r *http.Request)  {}
