@@ -2,8 +2,10 @@ package service
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"math/rand"
+	"strconv"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -54,7 +56,7 @@ func (s *UsersService) SignUp(ctx context.Context, input domain.SignUpInput) err
 	if err := input.Validate(); err != nil {
 		return err
 	}
-	
+
 	return s.repo.Create(ctx, user)
 }
 
@@ -87,7 +89,7 @@ func (s *UsersService) RefreshTokens(ctx context.Context, token string) (string,
 
 func (s *UsersService) generateTokens(ctx context.Context, userId int) (string, string, error) {
 	t := jwt.NewWithClaims(jwt.SigningMethodHS256, jwt.MapClaims{
-		"sub": userId,
+		"sub": strconv.Itoa(userId),
 		"iat": time.Now().Unix(),
 		"exp": time.Now().Add(time.Hour * 24).Unix(),
 	})
@@ -123,4 +125,32 @@ func newRefreshToken() (string, error) {
 	}
 
 	return fmt.Sprintf("%x", b), nil
+}
+
+func (s *UsersService) ParseToken(ctx context.Context, token string) (int, error) {
+	t, err := jwt.Parse(token, func(token *jwt.Token) (interface{}, error) {
+		if _, ok := token.Method.(*jwt.SigningMethodHMAC); !ok {
+			return nil, errors.New("invalid signing method")
+		}
+		return s.hmacSecret, nil
+	})
+	if err != nil {
+		return 0, err
+	}
+	if !t.Valid {
+		return 0, errors.New("invalid token")
+	}
+	claims, ok := t.Claims.(jwt.MapClaims)
+	if !ok {
+		return 0, errors.New("invalid claims")
+	}
+	subject, ok := claims["sub"].(string)
+	if !ok {
+		return 0, errors.New("invalid subject")
+	}
+	id, err := strconv.Atoi(subject)
+	if err != nil {
+		return 0, errors.New("invalid subject")
+	}
+	return id, nil
 }

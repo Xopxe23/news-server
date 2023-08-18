@@ -32,8 +32,9 @@ func (h *Handler) InitRoutes() *mux.Router {
 		auth.HandleFunc("/sign-in", h.signIn).Methods(http.MethodPost)
 		auth.HandleFunc("/refresh", h.refresh).Methods(http.MethodGet)
 	}
-
+	
 	authors := r.PathPrefix("/authors").Subrouter()
+	authors.Use(h.authMiddleware)
 	{
 		authors.HandleFunc("", h.getAllAuthors).Methods(http.MethodGet)
 		authors.HandleFunc("", h.createAuthor).Methods(http.MethodPost)
@@ -43,6 +44,7 @@ func (h *Handler) InitRoutes() *mux.Router {
 	}
 
 	articles := r.PathPrefix("/articles").Subrouter()
+	articles.Use(h.authMiddleware)
 	{
 		articles.HandleFunc("", h.getAllArticles).Methods(http.MethodGet)
 		articles.HandleFunc("", h.createArticle).Methods(http.MethodPost)

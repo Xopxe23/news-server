@@ -15,6 +15,7 @@ type UsersService interface {
 	SignUp(ctx context.Context, input domain.SignUpInput) error
 	SignIn(ctx context.Context, input domain.SignInInput) (string, string, error)
 	RefreshTokens(ctx context.Context, token string) (string, string, error)
+	ParseToken(ctx context.Context, token string) (int, error)
 }
 
 // @Summary Sign Up
