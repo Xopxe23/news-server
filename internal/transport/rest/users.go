@@ -16,6 +16,7 @@ type UsersService interface {
 	SignIn(ctx context.Context, input domain.SignInInput) (string, string, error)
 	RefreshTokens(ctx context.Context, token string) (string, string, error)
 	ParseToken(ctx context.Context, token string) (int, error)
+	GetBookmarks(ctx context.Context, userId int) ([]domain.ArticleOutput, error)
 }
 
 // @Summary Sign Up
@@ -153,6 +154,26 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 	}
 
 	w.Header().Add("Set-Cookie", fmt.Sprintf("refresh-token=%s; HttpOnly", refreshToken))
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
+func (h *Handler) getBookmarks(w http.ResponseWriter, r *http.Request) {
+	userId := r.Context().Value(ctxUserID).(int)
+	articles, err := h.usersService.GetBookmarks(r.Context(), userId)
+	if err != nil {
+		logError("getBookmarks", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(articles)
+	if err != nil {
+		logError("getBookmarks", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(response)
 }

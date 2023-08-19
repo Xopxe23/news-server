@@ -27,3 +27,22 @@ func (r *UsersRepository) GetByCredentials(ctx context.Context, email, password 
 		email, password).Scan(&user.Id, &user.Name, &user.Email)
 	return user, err
 }
+
+func (r *UsersRepository) GetBookmarks(ctx context.Context, userId int) ([]domain.ArticleOutput, error) {
+	var articles []domain.ArticleOutput
+	query := `SELECT ar.id, CONCAT(au.name, ' ', au.surname) as author, ar.title, ar.content, ar.created_at 
+			  FROM articles ar INNER JOIN authors au ON ar.author_id = au.id 
+			  INNER JOIN bookmarks bm ON ar.id = bm.article_id WHERE bm.user_id = $1;`
+	rows, err := r.db.Query(query, userId)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var article domain.ArticleOutput
+		if err := rows.Scan(&article.Id, &article.Author, &article.Title, &article.Content, &article.CreatedAt); err != nil {
+			return nil, err
+		}
+		articles = append(articles, article)
+	}
+	return articles, nil
+}

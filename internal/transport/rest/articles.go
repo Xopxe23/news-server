@@ -24,6 +24,7 @@ type ArticlesService interface {
 	CreateArticle(ctx context.Context, input domain.Article) (int, error)
 	GetAllArticles(ctx context.Context) ([]domain.ArticleOutput, error)
 	GetArticleById(ctx context.Context, articleId int) (domain.ArticleOutput, error)
+	AddArticleInBookmarks(ctx context.Context, articleId, userId int) error
 	UpdateArticle(ctx context.Context, articleId int, input domain.UpdateArticleInput) error
 	DeleteArticle(ctx context.Context, articleId int) error
 }
@@ -380,6 +381,47 @@ func (h *Handler) getArticleById(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(response)
+}
+
+// @Summary Add Article in bookmarks
+// @Security BearerAuth
+// @Tags Articles
+// @ID add-article-in-bookmarks
+// @Accept json
+// @Produce json
+// @Param id path int true "Article ID"
+// @Success 200
+// @Failure 400
+// @Failure 500
+// @Router /articles/{id}/bookmark [get]
+func (h *Handler) addArticleInBookmarks(w http.ResponseWriter, r *http.Request) {
+	articleId, err := getIdFromRequest(r)
+	if err != nil {
+		logError("addArticleInBookmarks", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	userId := r.Context().Value(ctxUserID).(int)
+
+	err = h.articlesService.AddArticleInBookmarks(r.Context(), articleId, userId)
+	if err != nil {
+		logError("addArticleInBookmarks", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	resposne, err := json.Marshal(map[string]string{
+		"status": "bookmark added",
+	})
+	if err != nil {
+		logError("addArticleInBookmarks", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(resposne)
 }
 
 // @Summary Update Article

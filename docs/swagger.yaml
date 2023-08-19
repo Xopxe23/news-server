@@ -208,6 +208,31 @@ paths:
       summary: Update Article
       tags:
       - Articles
+  /articles/{id}/bookmark:
+    get:
+      consumes:
+      - application/json
+      operationId: add-article-in-bookmarks
+      parameters:
+      - description: Article ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - BearerAuth: []
+      summary: Add Article in bookmarks
+      tags:
+      - Articles
   /auth/refresh:
     get:
       consumes:

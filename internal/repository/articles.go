@@ -52,6 +52,11 @@ func (r *ArticlesRepository) GetById(ctx context.Context, articleId int) (domain
 	return article, err
 }
 
+func (r *ArticlesRepository) AddInBookmars(ctx context.Context, id, userId int) error {
+	_, err := r.db.Exec("INSERT INTO bookmarks (user_id, article_id) VALUES ($1, $2)", userId, id)
+	return err
+}
+
 func (r *ArticlesRepository) Update(ctx context.Context, articleId int, input domain.UpdateArticleInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)

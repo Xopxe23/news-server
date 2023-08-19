@@ -19,6 +19,7 @@ type PasswordHasher interface {
 type UsersRepository interface {
 	Create(ctx context.Context, user domain.User) error
 	GetByCredentials(ctx context.Context, email, password string) (domain.User, error)
+	GetBookmarks(ctx context.Context, userId int) ([]domain.ArticleOutput, error)
 }
 
 type SessionsRepository interface {
@@ -153,4 +154,8 @@ func (s *UsersService) ParseToken(ctx context.Context, token string) (int, error
 		return 0, errors.New("invalid subject")
 	}
 	return id, nil
+}
+
+func (s *UsersService) GetBookmarks(ctx context.Context, userId int) ([]domain.ArticleOutput, error) {
+	return s.repo.GetBookmarks(ctx, userId)
 }

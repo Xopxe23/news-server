@@ -11,6 +11,7 @@ type ArticlesRepository interface {
 	Create(сtx context.Context, input domain.Article) (int, error)
 	GetAll(ctx context.Context) ([]domain.ArticleOutput, error)
 	GetById(ctx context.Context, id int) (domain.ArticleOutput, error)
+	AddInBookmars(ctx context.Context, id, userId int) error
 	Update(ctx context.Context, id int, input domain.UpdateArticleInput) error
 	Delete(ctx context.Context, id int) error
 }
@@ -78,6 +79,10 @@ func (s *ArticlesService) GetAllArticles(ctx context.Context) ([]domain.ArticleO
 
 func (s *ArticlesService) GetArticleById(ctx context.Context, articleId int) (domain.ArticleOutput, error) {
 	return s.articlesRepo.GetById(ctx, articleId)
+}
+
+func (s *ArticlesService) AddArticleInBookmarks(ctx context.Context, articleId, userId int) error {
+	return s.articlesRepo.AddInBookmars(ctx, articleId, userId)
 }
 
 func (s *ArticlesService) UpdateArticle(ctx context.Context, articleId int, input domain.UpdateArticleInput) error {
