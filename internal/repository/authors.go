@@ -50,6 +50,23 @@ func (r *AuthorsRepository) GetById(ctx context.Context, id int) (domain.Author,
 	return author, err
 }
 
+func (r *AuthorsRepository) GetArticles(ctx context.Context, id int) ([]domain.ArticleOutput, error) {
+	var articles []domain.ArticleOutput
+	rows, err := r.db.Query(`SELECT ar.id, CONCAT(au.name, ' ', au.surname) as author, ar.title, ar.content, ar.created_at
+							 FROM authors au INNER JOIN articles ar on ar.author_id = au.id WHERE au.id = $1`, id)
+	if err != nil {
+		return nil, err
+	}
+	for rows.Next() {
+		var article domain.ArticleOutput
+		if err := rows.Scan(&article.Id, &article.Author, &article.Title, &article.Content, &article.CreatedAt); err != nil {
+			return nil, err
+		}
+		articles = append(articles, article)
+	}
+	return articles, nil
+}
+
 func (r *AuthorsRepository) Update(ctx context.Context, id int, input domain.UpdateAuthorInput) error {
 	setValues := make([]string, 0)
 	args := make([]interface{}, 0)

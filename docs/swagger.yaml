@@ -123,7 +123,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Create Article
       tags:
       - Articles
@@ -148,7 +148,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Delete Article
       tags:
       - Articles
@@ -174,7 +174,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Get Article By Id
       tags:
       - Articles
@@ -204,7 +204,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Update Article
       tags:
       - Articles
@@ -292,7 +292,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Get All Authors
       tags:
       - Authors
@@ -319,7 +319,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Create Author
       tags:
       - Authors
@@ -344,7 +344,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Delete Author
       tags:
       - Authors
@@ -370,7 +370,7 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Get Author By Id
       tags:
       - Authors
@@ -400,9 +400,39 @@ paths:
         "500":
           description: Internal Server Error
       security:
-      - ApiKeyAuth: []
-      - ApiKeyAuth: []
+      - BearerAuth: []
       summary: Update Author
+      tags:
+      - Authors
+  /authors/{id}/articles:
+    get:
+      consumes:
+      - application/json
+      operationId: get-author-articles
+      parameters:
+      - description: Author ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              items:
+                $ref: '#/definitions/domain.Article'
+              type: array
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - BearerAuth: []
+      summary: Get Author Articles
       tags:
       - Authors
 securityDefinitions:

@@ -17,6 +17,7 @@ type ArticlesService interface {
 	CreateAuthor(ctx context.Context, author domain.Author) (int, error)
 	GetAllAuthors(ctx context.Context) ([]domain.Author, error)
 	GetAuthorById(ctx context.Context, authorId int) (domain.Author, error)
+	GetAuthorArticles(ctx context.Context, authorId int) ([]domain.ArticleOutput, error)
 	UpdateAuthor(ctx context.Context, authorId int, input domain.UpdateAuthorInput) error
 	DeleteAuthor(ctx context.Context, authorId int) error
 
@@ -28,7 +29,7 @@ type ArticlesService interface {
 }
 
 // @Summary Get All Authors
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Authors
 // @ID get-all-authors
 // @Accept json
@@ -59,7 +60,7 @@ func (h *Handler) getAllAuthors(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Create Author
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Authors
 // @ID create-author
 // @Accept json
@@ -104,7 +105,7 @@ func (h *Handler) createAuthor(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Get Author By Id
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Authors
 // @ID get-author-by-id
 // @Accept json
@@ -140,9 +141,45 @@ func (h *Handler) getAuthorById(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// @Summary Get Author Articles
+// @Security BearerAuth
+// @Tags Authors
+// @ID get-author-articles
+// @Accept json
+// @Produce json
+// @Param id path int true "Author ID"
+// @Success 200 {array} []domain.Article
+// @Failure 400
+// @Failure 500
+// @Router /authors/{id}/articles [get]
+func (h *Handler) getAuthorArticles(w http.ResponseWriter, r *http.Request) {
+	authorId, err := getIdFromRequest(r)
+	if err != nil {
+		logError("getAuthorArticles", err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	articles, err := h.articlesService.GetAuthorArticles(r.Context(), authorId)
+	if err != nil {
+		logError("getAuthorArticles", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	response, err := json.Marshal(articles)
+	if err != nil {
+		logError("getAuthorArticles", err)
+		w.WriteHeader(http.StatusInternalServerError)
+		return
+	}
+
+	w.Header().Add("Content-Type", "application/json")
+	w.Write(response)
+}
+
 // @Summary Update Author
-// @Security ApiKeyAuth
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Authors
 // @ID update-author
 // @Accept json
@@ -193,7 +230,7 @@ func (h *Handler) updateAuthor(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Delete Author
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Authors
 // @ID delete-author
 // @Accept json
@@ -261,7 +298,7 @@ func (h *Handler) getAllArticles(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Create Article
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Articles
 // @ID create-articles
 // @Accept json
@@ -307,7 +344,7 @@ func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Get Article By Id
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Articles
 // @ID get-article-by-id
 // @Accept json
@@ -346,7 +383,7 @@ func (h *Handler) getArticleById(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Update Article
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Articles
 // @ID update-article
 // @Accept json
@@ -399,7 +436,7 @@ func (h *Handler) updateArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Delete Article
-// @Security ApiKeyAuth
+// @Security BearerAuth
 // @Tags Articles
 // @ID delete-article
 // @Accept json

@@ -31,13 +31,14 @@ func (h *Handler) InitRoutes() *mux.Router {
 		auth.HandleFunc("/sign-in", h.signIn).Methods(http.MethodPost)
 		auth.HandleFunc("/refresh", h.refresh).Methods(http.MethodGet)
 	}
-	
+
 	authors := r.PathPrefix("/authors").Subrouter()
 	authors.Use(h.authMiddleware)
 	{
 		authors.HandleFunc("", h.getAllAuthors).Methods(http.MethodGet)
 		authors.HandleFunc("", h.createAuthor).Methods(http.MethodPost)
 		authors.HandleFunc("/{id:[0-9]+}", h.getAuthorById).Methods(http.MethodGet)
+		authors.HandleFunc("/{id:[0-9]+}/articles", h.getAuthorArticles).Methods(http.MethodGet)
 		authors.HandleFunc("/{id:[0-9]+}", h.updateAuthor).Methods(http.MethodPut)
 		authors.HandleFunc("/{id:[0-9]+}", h.deleteAuthor).Methods(http.MethodDelete)
 	}
