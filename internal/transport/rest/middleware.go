@@ -10,9 +10,10 @@ import (
 )
 
 
+type contextKey string
 
 const (
-	ctxUserID = "userId"
+	ctxUserID  contextKey = "userId"
 )
 
 func loggingMiddleware(next http.Handler) http.Handler {

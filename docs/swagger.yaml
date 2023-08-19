@@ -89,10 +89,16 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Article'
+            type: array
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - BearerAuth: []
       summary: Get All Articles
       tags:
       - Articles
@@ -116,6 +122,8 @@ paths:
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Create Article
       tags:
       - Articles
@@ -139,6 +147,8 @@ paths:
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Delete Article
       tags:
       - Articles
@@ -157,10 +167,14 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/domain.Article'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Get Article By Id
       tags:
       - Articles
@@ -189,6 +203,8 @@ paths:
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Update Article
       tags:
       - Articles
@@ -267,10 +283,16 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Author'
+            type: array
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Get All Authors
       tags:
       - Authors
@@ -290,10 +312,14 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            type: integer
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Create Author
       tags:
       - Authors
@@ -317,6 +343,8 @@ paths:
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Delete Author
       tags:
       - Authors
@@ -335,10 +363,14 @@ paths:
       responses:
         "200":
           description: OK
+          schema:
+            $ref: '#/definitions/domain.Author'
         "400":
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
       summary: Get Author By Id
       tags:
       - Authors
@@ -367,11 +399,14 @@ paths:
           description: Bad Request
         "500":
           description: Internal Server Error
+      security:
+      - ApiKeyAuth: []
+      - ApiKeyAuth: []
       summary: Update Author
       tags:
       - Authors
 securityDefinitions:
-  ApiKeyAuth:
+  BearerAuth:
     in: header
     name: Authorization
     type: apiKey

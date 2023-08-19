@@ -15,7 +15,6 @@ type Handler struct {
 
 func NewHandler(users UsersService, articles ArticlesService) *Handler {
 	return &Handler{
-		// articlesService: articles,
 		usersService:    users,
 		articlesService: articles,
 	}

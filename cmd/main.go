@@ -34,7 +34,7 @@ func init() {
 // @description Sample Server for News App
 // @host localhost:8000
 // @basepath /
-// @securityDefinitions.apikey ApiKeyAuth
+// @securityDefinitions.apikey BearerAuth
 // @in header
 // @name Authorization
 

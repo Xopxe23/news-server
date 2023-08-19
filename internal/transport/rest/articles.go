@@ -28,11 +28,12 @@ type ArticlesService interface {
 }
 
 // @Summary Get All Authors
+// @Security ApiKeyAuth
 // @Tags Authors
 // @ID get-all-authors
 // @Accept json
 // @Produce json
-// @Success 200
+// @Success 200 {array} domain.Author
 // @Failure 400
 // @Failure 500
 // @Router /authors [get]
@@ -58,12 +59,13 @@ func (h *Handler) getAllAuthors(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Create Author
+// @Security ApiKeyAuth
 // @Tags Authors
 // @ID create-author
 // @Accept json
 // @Produce json
 // @Param input body domain.Author true "Author input"
-// @Success 200
+// @Success 200 {integer} domain.Author.Id
 // @Failure 400
 // @Failure 500
 // @Router /authors [post]
@@ -102,12 +104,13 @@ func (h *Handler) createAuthor(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Get Author By Id
+// @Security ApiKeyAuth
 // @Tags Authors
 // @ID get-author-by-id
 // @Accept json
 // @Produce json
 // @Param id path int true "Author ID"
-// @Success 200
+// @Success 200 {object} domain.Author
 // @Failure 400
 // @Failure 500
 // @Router /authors/{id} [get]
@@ -138,6 +141,8 @@ func (h *Handler) getAuthorById(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Update Author
+// @Security ApiKeyAuth
+// @Security ApiKeyAuth
 // @Tags Authors
 // @ID update-author
 // @Accept json
@@ -188,6 +193,7 @@ func (h *Handler) updateAuthor(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Delete Author
+// @Security ApiKeyAuth
 // @Tags Authors
 // @ID delete-author
 // @Accept json
@@ -224,11 +230,12 @@ func (h *Handler) deleteAuthor(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Get All Articles
+// @Security BearerAuth
 // @Tags Articles
 // @ID get-all-articles
 // @Accept json
 // @Produce json
-// @Success 200
+// @Success 200 {array} domain.Article
 // @Failure 400
 // @Failure 500
 // @Router /articles [get]
@@ -254,6 +261,7 @@ func (h *Handler) getAllArticles(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Create Article
+// @Security ApiKeyAuth
 // @Tags Articles
 // @ID create-articles
 // @Accept json
@@ -299,12 +307,13 @@ func (h *Handler) createArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Get Article By Id
+// @Security ApiKeyAuth
 // @Tags Articles
 // @ID get-article-by-id
 // @Accept json
 // @Produce json
 // @Param id path int true "Article ID"
-// @Success 200
+// @Success 200 {object} domain.Article
 // @Failure 400
 // @Failure 500
 // @Router /articles/{id} [get]
@@ -337,6 +346,7 @@ func (h *Handler) getArticleById(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Update Article
+// @Security ApiKeyAuth
 // @Tags Articles
 // @ID update-article
 // @Accept json
@@ -389,6 +399,7 @@ func (h *Handler) updateArticle(w http.ResponseWriter, r *http.Request) {
 }
 
 // @Summary Delete Article
+// @Security ApiKeyAuth
 // @Tags Articles
 // @ID delete-article
 // @Accept json
