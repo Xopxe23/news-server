@@ -233,6 +233,29 @@ paths:
       summary: Add Article in bookmarks
       tags:
       - Articles
+  /auth/home/bookmarks:
+    get:
+      consumes:
+      - application/json
+      operationId: get-bookmarks
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/domain.Article'
+            type: array
+        "400":
+          description: Bad Request
+        "500":
+          description: Internal Server Error
+      security:
+      - BearerAuth: []
+      summary: Get Bookmarks
+      tags:
+      - Users auth
   /auth/refresh:
     get:
       consumes:

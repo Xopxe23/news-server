@@ -158,6 +158,16 @@ func (h *Handler) refresh(w http.ResponseWriter, r *http.Request) {
 	w.Write(response)
 }
 
+// @Summary Get Bookmarks
+// @Security BearerAuth
+// @Tags Users auth
+// @ID get-bookmarks
+// @Accept json
+// @Produce json
+// @Success 200 {array} domain.Article
+// @Failure 400
+// @Failure 500
+// @Router /auth/home/bookmarks [get]
 func (h *Handler) getBookmarks(w http.ResponseWriter, r *http.Request) {
 	userId := r.Context().Value(ctxUserID).(int)
 	articles, err := h.usersService.GetBookmarks(r.Context(), userId)
@@ -177,3 +187,4 @@ func (h *Handler) getBookmarks(w http.ResponseWriter, r *http.Request) {
 	w.Header().Add("Content-Type", "application/json")
 	w.Write(response)
 }
+ 
