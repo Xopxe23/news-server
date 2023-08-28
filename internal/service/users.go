@@ -9,6 +9,8 @@ import (
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
+	"github.com/sirupsen/logrus"
+	audit "github.com/xopxe23/auditlog/pkg/domain"
 	"github.com/xopxe23/news-server/internal/domain"
 )
 
@@ -27,17 +29,23 @@ type SessionsRepository interface {
 	GetToken(ctx context.Context, token string) (domain.RefreshSession, error)
 }
 
+type AuditClient interface {
+	SendLogRequest(ctx context.Context, req audit.LogItem) error
+}
+
 type UsersService struct {
 	repo         UsersRepository
 	hasher       PasswordHasher
+	auditClient  AuditClient
 	sessionsRepo SessionsRepository
 	hmacSecret   []byte
 }
 
-func NewUsersService(repo UsersRepository, hasher PasswordHasher, sessionsRepo SessionsRepository, secret []byte) *UsersService {
+func NewUsersService(repo UsersRepository, auditClient AuditClient, hasher PasswordHasher, sessionsRepo SessionsRepository, secret []byte) *UsersService {
 	return &UsersService{
 		repo:         repo,
 		sessionsRepo: sessionsRepo,
+		auditClient:  auditClient,
 		hasher:       hasher,
 		hmacSecret:   secret,
 	}
@@ -58,7 +66,27 @@ func (s *UsersService) SignUp(ctx context.Context, input domain.SignUpInput) err
 		return err
 	}
 
-	return s.repo.Create(ctx, user)
+	if err := s.repo.Create(ctx, user); err != nil {
+		return err
+	}
+
+	user, err = s.repo.GetByCredentials(ctx, input.Email, password)
+	if err != nil {
+		return err
+	}
+
+	if err := s.auditClient.SendLogRequest(ctx, audit.LogItem{
+		Action: audit.ACTION_REGISTER,
+		Entity: audit.ENTITY_USER,
+		EntityID: int64(user.Id),
+		Timestamp: time.Now(),
+	}); err != nil {
+		logrus.WithFields(logrus.Fields{
+			"method": "Users.SignUp",
+		}).Error("failed to sent log request: ", err)
+	}
+
+	return nil
 }
 
 func (s *UsersService) SignIn(ctx context.Context, input domain.SignInInput) (string, string, error) {

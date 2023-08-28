@@ -13,6 +13,7 @@ import (
 	"github.com/xopxe23/news-server/internal/config"
 	"github.com/xopxe23/news-server/internal/repository"
 	"github.com/xopxe23/news-server/internal/service"
+	grpc_client "github.com/xopxe23/news-server/internal/transport/grpc"
 	"github.com/xopxe23/news-server/internal/transport/rest"
 	"github.com/xopxe23/news-server/pkg/database"
 	hasher "github.com/xopxe23/news-server/pkg/hash"
@@ -61,7 +62,12 @@ func main() {
 
 	usersRepos := repository.NewUsersRepository(db)
 	tokensRepos := repository.NewTokensRepository(db)
-	usersService := service.NewUsersService(usersRepos, hasher, tokensRepos, []byte("sample secret"))
+	
+	auditClient, err := grpc_client.NewClient(9000)
+	if err != nil {
+		log.Fatal(err)
+	}
+	usersService := service.NewUsersService(usersRepos, auditClient, hasher, tokensRepos, []byte("sample secret"))
 
 	authorsRepos := repository.NewAuthorsRepository(db)
 	articlesRepos := repository.NewArticlesRepository(db)
